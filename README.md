@@ -44,3 +44,18 @@ npm i bcrypt @types/bcrypt
 It will also handle comparing those two passwords during a login to make sure the login attempt's password can be matched to that secure hash/salt we have in our database.  
 
 Push to your repo after installing these and let me know so I can inspect your `package.json` to confirm this step is done!  
+
+### Add To Your Config File
+
+We'll need a "secret" phrase for our tokens coming up, so add to your config object something like this and use whatever phrase you want:
+```js
+export default {
+	mysql: { 
+		...
+	}
+	auth: {
+		secret: 'Lord-Percival-Fredrickstein-von-Musel-Klossowski-de-Rolo-III'
+	}
+}
+```
+Think of this as our personal signature on each token.  This will prevent someone from making fake tokens as they will never be able to guess our personal signature.  Since this file is in your `.gitignore` you can't push it to github and show me, so send me a DM with your config object pasted in so I can confirm this step is done.
