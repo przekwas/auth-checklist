@@ -80,3 +80,59 @@ export default {
 ```
 
 And that's it!  Push changes to github and DM me.
+
+### Utilities
+
+We know that we can code everything in one big ol' file but we also know that's not a good idea.  We wanna keep things small, compartmentalized, and easy to find/debug in a file with like 20 lines rather than a file with 20,000 lines!  So the structure of these is my opinion on a good practice, so let's go!
+
+```js
+/* FILE PATH TO MAKE */
+// /server/utils/passwords.ts
+
+// import the bcrypt library so we can use it
+import * as bcrypt from 'bcrypt';
+
+// a function that will take a plain-text password like percyisakitten2020
+// and output a hash like $2b$12$gSgZrFBv/XrMuXMr7go5O.nZv8Xti5vL2bNijTGKSKBCNybIMtuLO
+export const generateHash = (password: string) => {
+	// the number of salt rounds for encyption, 10-12 is a good baseline
+	// https://en.wikipedia.org/wiki/Salt_(cryptography)
+	const salt = bcrypt.genSaltSync(12);
+	// take our plain-text password, our salt, and generate the hash
+	const hash = bcrypt.hashSync(password, salt);
+	// return it, we're gonna use it when we "register" a new user!
+	return hash;
+}
+
+// a function that will take a user's password they're attempting to log in with
+// and a hash they have stored in the database
+// it will simply return true or false for us!
+export const comparePasswords = (password: string, hash: string) => {
+	return bcrypt.compareSync(password, hash);
+}
+```
+```js
+/* FILE PATH TO MAKE */
+// /server/utils/tokens.ts
+
+// import the jsonwebtoken library so we can use it to make a jwt
+import * as jwt from 'jsonwebtoken';
+// this will be needed for our "secret" signature for the creating a token :)
+import config from '../config';
+
+// this will describe what our "payload" that we encode will be, simply who this token belongs to
+export interface IPayload {
+	userid: number;
+}
+
+// this function will make our token!  It takes a payload as the argument
+export const createToken = (payload: IPayload) => {
+	// jwt.sign makes a token, signed with a secret signature
+	// payload is well .. an object with just userid in it
+	// config.auth.secret is any string you want!  As long as it is consistent and HIDDEN FROM GITHUB
+	// the expiresIn is optional but we don't want a token existing forever, so we choose to expire it in 15 days
+	const token = jwt.sign(payload, config.auth.secret, { expiresIn: '15d' });
+	return token;
+}
+```
+Add these files and code to your repo and push.  DM me when you do!
