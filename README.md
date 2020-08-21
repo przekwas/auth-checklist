@@ -59,3 +59,24 @@ export default {
 }
 ```
 Think of this as our personal signature on each token.  This will prevent someone from making fake tokens as they will never be able to guess our personal signature.  Since this file is in your `.gitignore` you can't push it to github and show me, so send me a DM with your config object pasted in so I can confirm this step is done.
+
+### Queries
+
+We'll need at least two queries for your authors table.  So if you don't have an `authors.ts` file in your db folder, make one!  We will eventually need to: find a user by their email (like they're trying to log in!) and by their id (classic CRUD stuff).  We can actually do this with just 1 function, let's see how:
+```js
+import  {  Connection  }  from  "./index";
+
+// the ?? is an escape placeholder for column names
+// the ? is the same escape character you've used for values!
+// Examples:
+// await db.authors.find('email', 'luke@covalence.io');
+// await db.authors.find('id', 1);
+// it works with any column you want from your table :)
+const find = (column: string, value: string | number) => Connection('SELECT * FROM authors WHERE ?? = ?', [column, value]);
+
+export default {
+	find
+};
+```
+
+And that's it!  Push changes to github and DM me.
