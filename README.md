@@ -187,6 +187,7 @@ passport.use(
 				// this is a good security step.  DO NOT pass around a user's password anymore than where you need it
 				delete author.password;
 				// done(); is the magic function passport uses to know this strategy is well .. done running!
+                // this creates req.user with our user's info!
 				done(null, author);
 			} else {
 				// this represents a bad login attempt, and passport will auto send a response for you of 401 Unauthorized, how cool is that!
@@ -198,5 +199,37 @@ passport.use(
 			done(error);
 		}
 	})
+);
+
+passport.use(
+	new jwtStrategy.Strategy(
+		{
+			// this will find the token on our requests, specifically in the request headers under the key "Authorization" with a value of "Bearer OUR_TOKEN_HERE" if it sees it .. it extracts it for you!!  NOICE!
+			jwtFromRequest: jwtStratey.ExtractJwt.fromAuthHeaderAsBearerToken(),
+			// check the token's secret signature against ours, if not a match?  This token is BAD and it wil auto send a response of 401 Unauthorized
+			// it even will check if the token is expired automatically!  Double NOICE!
+			secretOrKey: config.auth.secret
+		},
+		async (payload: IPayload, done) => {
+			try {
+				// the payload has a userid in it, so let's see if that number actually exists to an author in our database!
+				const [author] = await db.authors.find('id', payload.userid);
+                // if the author is indeed real, then we do the same done workflow from before
+				if (author) {
+					// this is a good security step.  DO NOT pass around a user's password anymore than where you need it
+					delete author.password;
+                    // this creates req.user with our user's info!
+					done(null, author);
+				} else {
+                    // something didn't match up in the database .. this payload is bad, therefore 401!!!
+					done(null, false);
+				}
+			} catch (error) {
+                // whoopsie lol
+				console.log(error);
+				done(error);
+			}
+		}
+	)
 );
 ```
